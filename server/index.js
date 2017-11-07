@@ -245,6 +245,7 @@ io.sockets.on('connection', function (socket) {
           "yt:" + ytUrl
         ])
         .then(d => {
+          console.log(d)
           if(d == null) {
             socket.emit('onError', 'Invalid URL or Video is not found')
           } else {

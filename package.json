@@ -19,8 +19,10 @@
     "request": "^2.82.0",
     "request-promise": "^4.2.2",
     "sequelize": "^3.30.4",
+    "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.3",
     "sqlite": "^2.8.0",
+    "sqlite3": "^3.1.13",
     "ws": "^3.2.0",
     "youtube-dl": "^1.11.1"
   },
