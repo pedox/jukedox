@@ -1,5 +1,4 @@
 const app = require('./app')
-const Mopidy = require("mopidy")
 const _c = require("./../config/config")
 const rd = app.rd
 const db = app.db
@@ -8,12 +7,9 @@ const rp = require('request-promise')
 const fs = require('fs')
 const youtubedl = require('youtube-dl')
 
-
 let playerStatus = false
 let disControl = false
 let onDownload = false
-
-
 
 const ws = new WebSocket(`ws://${_c.mopidy}/mopidy/ws/`, {
   perMessageDeflate: false

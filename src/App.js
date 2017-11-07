@@ -1,20 +1,9 @@
 import React, { Component } from 'react';
-import '../assets/react-toolbox/theme.css';
 import './App.css';
-import 'material-design-icons/iconfont/material-icons.css';
 import 'font-roboto/dist/styles/roboto.css';
 import 'font-awesome/css/font-awesome.css';
-import theme from '../assets/react-toolbox/theme.js'
-import {Card, CardTitle} from 'react-toolbox/lib/card'
-import AppBar from 'react-toolbox/lib/app_bar/AppBar'
-import Input from 'react-toolbox/lib/input/Input'
 import openSocket from 'socket.io-client'
 import Api  from './Api'
-import { List, ListItem, ListSubHeader, ListDivider, ListCheckbox } from 'react-toolbox/lib/list'
-
-import FontIcon from 'react-toolbox/lib/font_icon/FontIcon'
-
-import ThemeProvider from 'react-toolbox/lib/ThemeProvider';
 
 const socket = openSocket(window._SERVER)
 
