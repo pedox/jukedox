@@ -28,6 +28,16 @@ class Api {
         })
         .then((response) => response.json())
     }
+    delete(endpoint, params = {}) {
+        return fetch(`/api/${endpoint}?${queryString.stringify(params)}`, {
+            method: 'DELETE',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then((response) => response.json())
+    }
 }
 
 

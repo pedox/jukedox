@@ -13,6 +13,7 @@ class App extends Component {
     name: "",
     ytUrl: "",
     search: "",
+    id: "",
     disControl: false,
     isLogin: false,
     alertMsg: null,
@@ -27,7 +28,9 @@ class App extends Component {
     queue: [
     ],
     saved: [
+      
     ]
+
   }
 
   constructor() {
@@ -71,7 +74,9 @@ class App extends Component {
   }
 
   renderPlayer() {
-    const {optionList} = this.state
+    const {optionList, queue} = this.state
+    
+    console.log(queue)
     return (
       <div className="player-outer">
         <div className="main-ui player">
@@ -117,15 +122,16 @@ class App extends Component {
               <ol>
                 {this.state.listType == 1 ? 
                   this.state.queue.map((d, i) => {
-                    return <li key={i} className={d.active == 1 && "playing"}>{`${d.from} : `} {d.name}</li>
+                    return <li key={i} className={d.active == 1 && "playing"}>{this.state.name} :  {d.name}</li>
                   }) :
                   optionList !== false ? 
                   <div className="option-list">
                     <div className="track-name">{optionList.title}</div>
                     <div className="track-name">{optionList.playCount} Played</div>
                     <div className="action">
-                      <a href="#" onClick={(e) => this.setTrackAction(optionList.id, 1, e)}>Add to Queue</a>
+                      <a href="#" onClick={(e) => this.setTrackAction(optionList, 1, e)}>Add to Queue</a>
                       <a href="#" onClick={(e) => this.setTrackAction(optionList, null, e)}>Back to the list</a>
+                      <a href="#" onClick={(e) => this.setTrackAction(optionList, 3, e)}>Delete track</a> 
                     </div>
                   </div> :
                   this.state.saved.map((d, i) => {
@@ -140,14 +146,14 @@ class App extends Component {
               {this.state.listType == 2 && this.state.optionList === false ? 
                 <form onSubmit={(e) => this.searchList(e)}>
                   <input 
-                    type="text" 
+                    type="text"
                     placeholder="Search" 
                     className="input-text g-color b-black"
                     onChange={this.handleChange.bind(this, 'search')} 
                     value={this.state.search} 
                     />
                 </form> : 
-                <p className="l-info">Logedin as {this.state.name}</p>
+                <p className="l-info">Logged in as {this.state.name}</p>
               }
             </div>
           </div>
@@ -265,16 +271,34 @@ class App extends Component {
     </div>
   }
 
-  setTrackAction(key, action = null, e) {
+  setTrackAction(data, action = null, e) {
     if(e) e.preventDefault()
     var optionList = false
+    console.log(data)
     switch(action) {
       case 0:
-        optionList = this.state.saved[key]
+        optionList = this.state.saved[data]
         break;
       case 1:
-        socket.emit('addSavedToQueue', key)
+          var { queue } = this.state
+
+          var youtubeCodes = queue.map(d => d.comment)
+
+          console.log(queue, youtubeCodes, data.url)
+          
+          if(youtubeCodes.indexOf(data.url) > -1) {
+            this.alertToggle("Track already exist.")
+          } else {
+            socket.emit('addSavedToQueue', data.id)
+          }
         break;
+      case 3:
+        new Api().delete("delete/" + data.id)
+        .then( () => {
+          optionList = this.state.saved[data.id]
+        })
+       break;
+
     }
     this.setState({optionList})
   }
@@ -288,20 +312,39 @@ class App extends Component {
 
   searchList(e) {
     e.preventDefault()
+    new Api().get("search", {
+      title: this.state.search
+    })
+    .then(data => {
+      console.log(data)
+      this.setState({saved:data})
+    })
   }
 
   addMusic(e) {
-    var { ytUrl } = this.state
+    var { ytUrl, queue } = this.state
+    var youtubeCodes = queue.map(d => d.comment)
     e.preventDefault()
     var m = ytUrl.match(/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/)
+    
     if(m) {
       // is valid ..
-      socket.emit('addTrack', ytUrl)
-      this.setState({
-        ytUrl: '', 
-        disControl: true,
-        playerTitle: 'Adding to Queue (Please Wait)...'
-      })
+      if(youtubeCodes.indexOf(m[5]) > -1) {
+
+        this.alertToggle("Track already exist.")
+
+      } else {  
+        this.setState({
+          ytUrl: '', 
+          disControl: true,
+          playerTitle: 'Adding to Queue (Please Wait)...'
+          
+        })
+        socket.emit('addTrack', ytUrl)
+      }
+      
+      
+
     } else {
       this.alertToggle("Is not valid Youtube URL")
     }

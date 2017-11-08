@@ -26,6 +26,36 @@ app.get('/api/saved', (req, res) => {
   })
 })
 
+app.get('/api/search', (req, res) => {
+  console.log('Searching')
+  return db.SavedSongs.findAll({
+    where: {
+      title: {
+        $like: '%'+req.query.title+'%'
+      }
+    }//["title like '%'.req.params.title.'%'"]
+  })
+  .then(d => {
+    res.json(d.map(e => e.get({plain:true})))
+  })
+  .catch(function(){
+    res.json("Not Found")
+  })
+})
+
+app.delete('/api/delete/:id', (req, res) => {
+  console.log('deleting')
+  return db.SavedSongs.destroy({
+    where: {
+      id: req.params.id
+    }
+  })
+  .then(d => {
+    console.log('Deleting')
+    res.json(d.map(e => e.get({plain:true})))
+  })
+})
+
 // Always return the main index.html, so react-router render the route in the client
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', 'build', 'index.html'));

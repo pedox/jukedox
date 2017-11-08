@@ -267,7 +267,7 @@ io.sockets.on('connection', function (socket) {
           mopidApi('core.tracklist.add', [
             [
               {
-                "comment": "",
+                "comment": d.url,
                 "name": `${d.title}`,
                 "uri": "file:" + __dirname + '/../music/' + d.filename,
                 "__model__": "Track"
