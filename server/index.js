@@ -11,6 +11,9 @@ let playerStatus = false
 let disControl = false
 let onDownload = false
 
+// {user, trackId}
+let userMusic = []
+
 const ws = new WebSocket(`ws://${_c.mopidy}/mopidy/ws/`, {
   perMessageDeflate: false
 });
@@ -156,13 +159,14 @@ const getCurrentTrack = function() {
     return mopidApi('core.tracklist.get_tl_tracks')
   })
   .then(_queue => {
+    console.log(userMusic)
     queue = _queue.map(d => {
       var tlid = d.tlid
       d = d.track
       if(current) {
         if(tlid == current.tlid) d.active = 1
       }
-      d.from = 'pedox'
+      d.user = typeof userMusic.indexOf(tlid) > -1 ? userMusic[tlid].user : {name: "Unknown"}
       return d
     })
     return mopidApi('core.playback.get_state')
@@ -209,7 +213,7 @@ io.sockets.on('connection', function (socket) {
   })
 
   socket.on('addTrack', (data) => {
-    let {ytUrl, user} = data
+    let {ytUrl, user} = JSON.parse(data)
     var m = ytUrl.match(/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/)
     var ytId = m[5]
     db.SavedSongs.findOne({where: {url:ytId}})
@@ -222,8 +226,7 @@ io.sockets.on('connection', function (socket) {
             [
               {
                 "comment": "",
-                "user": user.name,
-                "name": `${d.title}`,
+                "name": `${user.name} : ${d.title}`,
                 "uri": "file:" + __dirname + '/../music/' + d.filename,
                 "__model__": "Track"
               }
@@ -248,6 +251,11 @@ io.sockets.on('connection', function (socket) {
         ])
         .then(d => {
           console.log(d)
+
+          userMusic[d[0].tlid] = {
+            user
+          }
+
           if(d == null) {
             socket.emit('onError', 'Invalid URL or Video is not found')
           } else {
@@ -259,7 +267,8 @@ io.sockets.on('connection', function (socket) {
     })
   })
 
-  socket.on('addSavedToQueue', (key) => {
+  socket.on('addSavedToQueue', (data) => {
+    let {user, key} = JSON.parse(data)
     db.SavedSongs.findById(key)
     .then(d => {
       if(d !== null) {
@@ -270,8 +279,7 @@ io.sockets.on('connection', function (socket) {
             [
               {
                 "comment": d.url,
-                "name": `${d.title}`,
-                "user": user.name,
+                "name": `${user.name} : ${d.title}`,
                 "uri": "file:" + __dirname + '/../music/' + d.filename,
                 "__model__": "Track"
               }
@@ -282,6 +290,10 @@ io.sockets.on('connection', function (socket) {
           .then(d => {
             if(d == null) {
               socket.emit('onError', 'File Not Found')
+            } else {
+              userMusic[d[0].tlid] = {
+                user
+              }
             }
             getCurrentTrack()
           })

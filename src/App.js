@@ -124,7 +124,7 @@ class App extends Component {
               <ol>
                 {this.state.listType == 1 ? 
                   this.state.queue.map((d, i) => {
-                    return <li key={i} className={d.active == 1 && "playing"}>{d.user} :  {d.name}</li>
+                    return <li key={i} className={d.active == 1 && "playing"}>{d.name}</li>
                   }) :
                   optionList !== false ? 
                   <div className="option-list">
@@ -291,7 +291,11 @@ class App extends Component {
           if(youtubeCodes.indexOf(data.url) > -1) {
             this.alertToggle("Track already exist.")
           } else {
-            socket.emit('addSavedToQueue', data.id)
+            var key = data.id
+            var user = {
+              name: this.state.name
+            }
+            socket.emit('addSavedToQueue', JSON.stringify({user, key}))
           }
         break;
       case 3:
@@ -345,9 +349,9 @@ class App extends Component {
           playerTitle: 'Adding to Queue (Please Wait)...'
           
         })
-        socket.emit('addTrack', {
+        socket.emit('addTrack', JSON.stringify({
           ytUrl, user
-        })
+        }))
       }
       
       
