@@ -124,7 +124,7 @@ class App extends Component {
               <ol>
                 {this.state.listType == 1 ? 
                   this.state.queue.map((d, i) => {
-                    return <li key={i} className={d.active == 1 && "playing"}>{d.name}</li>
+                    return <li key={i} className={d.active == 1 && "playing"}>{d.user}</li>
                   }) :
                   optionList !== false ? 
                   <div className="option-list">
