@@ -208,7 +208,8 @@ io.sockets.on('connection', function (socket) {
     })
   })
 
-  socket.on('addTrack', (ytUrl) => {
+  socket.on('addTrack', (data) => {
+    let {ytUrl, user} = data
     var m = ytUrl.match(/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/)
     var ytId = m[5]
     db.SavedSongs.findOne({where: {url:ytId}})
@@ -221,6 +222,7 @@ io.sockets.on('connection', function (socket) {
             [
               {
                 "comment": "",
+                "user": user.name,
                 "name": `${d.title}`,
                 "uri": "file:" + __dirname + '/../music/' + d.filename,
                 "__model__": "Track"
@@ -269,6 +271,7 @@ io.sockets.on('connection', function (socket) {
               {
                 "comment": d.url,
                 "name": `${d.title}`,
+                "user": user.name,
                 "uri": "file:" + __dirname + '/../music/' + d.filename,
                 "__model__": "Track"
               }

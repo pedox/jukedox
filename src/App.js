@@ -7,6 +7,8 @@ import Api  from './Api'
 
 const socket = openSocket(window._SERVER)
 
+
+
 class App extends Component {
 
   state = {
@@ -122,7 +124,7 @@ class App extends Component {
               <ol>
                 {this.state.listType == 1 ? 
                   this.state.queue.map((d, i) => {
-                    return <li key={i} className={d.active == 1 && "playing"}>{this.state.name} :  {d.name}</li>
+                    return <li key={i} className={d.active == 1 && "playing"}>{d.user} :  {d.name}</li>
                   }) :
                   optionList !== false ? 
                   <div className="option-list">
@@ -324,6 +326,9 @@ class App extends Component {
   addMusic(e) {
     var { ytUrl, queue } = this.state
     var youtubeCodes = queue.map(d => d.comment)
+    var user = {
+      name: this.state.name,
+    }
     e.preventDefault()
     var m = ytUrl.match(/^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/)
     
@@ -340,7 +345,9 @@ class App extends Component {
           playerTitle: 'Adding to Queue (Please Wait)...'
           
         })
-        socket.emit('addTrack', ytUrl)
+        socket.emit('addTrack', {
+          ytUrl, user
+        })
       }
       
       
